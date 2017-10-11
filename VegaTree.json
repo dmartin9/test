@@ -265,14 +265,5 @@
         }
       ]
     }
-  ],
-
-  "scales": [
-    {
-      "name": "color",
-      "type": "ordinal",
-      "domain": ["depends on", "imported by"],
-      "range": [{"signal": "colorIn"}, {"signal": "colorOut"}]
-    }
   ]
 }
