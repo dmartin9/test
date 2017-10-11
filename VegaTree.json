@@ -1,8 +1,8 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v3.0.json",
   "padding": 5,
-  "width": 720,
-  "height": 720,
+  "width": 1080,
+  "height": 900,
   "autosize": "none",
 
   "signals": [
@@ -53,7 +53,7 @@
       "transform": [
         {
           "type": "filter",
-          "expr": "datum.id < 40"
+          "expr": "datum.id < 50"
         },
         {
           "type": "stratify",
@@ -119,11 +119,11 @@
       "transform": [
         {
           "type": "filter",
-          "expr": "datum.source < 40"
+          "expr": "datum.source < 50"
         },
         {
           "type": "filter",
-          "expr": "datum.target < 40"
+          "expr": "datum.target < 50"
         },
         {
           "type": "formula",
