@@ -255,7 +255,7 @@
               "strokeOpacity": [
                 {"test": "parent.source === active || parent.target === active", "value": 1},
                 {"test": "parent.similarity > 85", "value":0.5},
-                {"value": 0.1}
+                {"value": 0.25}
               ],
               "tension": {"signal": "tension"},
               "x": {"field": "x"},
