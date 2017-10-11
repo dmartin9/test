@@ -214,7 +214,7 @@
           "startAngle": {"signal": "(datum.angle-270) * PI / 180.0 -.05"},
           "endAngle": {"signal": "(datum.angle-270) * PI / 180.0 +0.05"},
           "padAngle": {"value":0},
-          "innerRadius": {"signal": "radius-5"},
+          "innerRadius": {"signal": "radius-10"},
           "outerRadius": {"signal": "radius"},
           "strokeWidth": {"value": 0.1},
           "opacity": {"value": 1}
