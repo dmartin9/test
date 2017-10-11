@@ -241,7 +241,7 @@
           "encode": {
             "enter": {
               "interpolate": {"value": "bundle"},
-              "strokeWidth": {"signal": "parent.similarity *0.03"},
+              "strokeWidth":  [{"test": "(parent.similarity  > 85)", "signal": "(parent.similarity - 85) * 0.9"},{"value":0.5}],
               "stroke": {
                 "color": {
                   "r": {"field": "r"},
