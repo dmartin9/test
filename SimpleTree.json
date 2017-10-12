@@ -1,0 +1,7 @@
+[
+  {"id":1, "name": "top"},
+  {"weight":25,"id":2,"parent":1,"name":"First"},
+  {"weight":50,"id":3,"parent":1,"name":"Second"},
+  {"weight":51,"id":4,"parent":1,"name":"Third"},
+  {"weight":100,"id":5,"parent":1,"name":"Fourth"}
+]
