@@ -1,0 +1,14 @@
+[
+  {"source": 2, "target": 3, "similarity": 50},
+  {"source": 2, "target": 4, "similarity": 46},
+  {"source": 2, "target": 5, "similarity": 14},
+  {"source": 3, "target": 2, "similarity": 50},
+  {"source": 3, "target": 4, "similarity": 91},
+  {"source": 3, "target": 5, "similarity": 29},
+  {"source": 4, "target": 2, "similarity": 46},
+  {"source": 4, "target": 3, "similarity": 91},
+  {"source": 4, "target": 5, "similarity": 32},
+  {"source": 5, "target": 2, "similarity": 14},
+  {"source": 5, "target": 3, "similarity": 29},
+  {"source": 5, "target": 4, "similarity": 32}
+]
