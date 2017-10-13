@@ -15,26 +15,9 @@
       "bind": {"input": "range", "min": 20, "max": 400}
     },
     {
-      "name": "extent", "value": 360,
-      "bind": {"input": "range", "min": 0, "max": 360, "step": 1}
-    },
-    {
-      "name": "rotate", "value": 0
-    },
-    {
       "name": "textSize", "value": 8,
       "bind": {"input": "range", "min": 2, "max": 20, "step": 1}
     },
-    {
-      "name": "textOffset", "value": 2,
-      "bind": {"input": "range", "min": 0, "max": 10, "step": 1}
-    },
-    {
-      "name": "layout", "value": "cluster",
-      "bind": {"input": "radio", "options": ["tidy", "cluster"]}
-    },
-    { "name": "colorIn", "value": "firebrick" },
-    { "name": "colorOut", "value": "forestgreen" },
     { "name": "originX", "update": "width / 2" },
     { "name": "originY", "update": "height / 2" },
     {
@@ -164,18 +147,14 @@
         "update": {
           "x": {"signal": "originX"},
           "y": {"signal": "originY"},
-          "dx": {"signal": "0"},
           "theta": {"signal": "datum.angle"},
           "radius":{"signal":"radius+20"},
-          "dx": {"signal": "textOffset * (datum.leftside ? 1 : -1)"},
+          "dx": {"signal": "2 * (datum.leftside ? 1 : -1)"},
           "align": {"signal": "datum.leftside ? 'right' : 'left'"},
           "angle": {"signal": "datum.leftside ? (datum.angle * 180 / PI) + 90:(datum.angle * 180 / PI) - 90"},
           "fontSize": {"signal": "textSize"},
-          "fontWeight": [
-            {"test": "indata('selected', 'source', datum.id)", "value": "bold"},
-            {"test": "indata('selected', 'target', datum.id)", "value": "bold"},
-            {"value": null}
-          ],
+          "opacity": [{"test": "active != null && !(indata('selected', 'source', datum.id)) && !(indata('selected', 'target', datum.id))", "value": 0},
+          {"value": 1}],
           "fill": [
             {"test": "datum.id === active", "value": "black"},
 
