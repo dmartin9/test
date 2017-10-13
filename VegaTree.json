@@ -40,7 +40,7 @@
     {
       "name": "active", "value": null,
       "on": [
-        { "events": "text:mouseover", "update": "datum.id" },
+        { "events": "arc:mouseover", "update": "datum.id" },
         { "events": "mouseover[!event.item]", "update": "null" }
       ]
     }
@@ -49,82 +49,57 @@
   "data": [
     {
       "name": "tree",
-      "url": "https://raw.githubusercontent.com/dmartin9/test/master/tree.json",
+      "url": "https://raw.githubusercontent.com/dmartin9/test/master/TestTree.json",
       "transform": [
-        {
-          "type": "filter",
-          "expr": "datum.id < 50"
-        },
         {
           "type": "stratify",
           "key": "id",
           "parentKey": "parent"
         },
         {
-          "type": "tree",
-          "method": {"signal": "layout"},
-          "size": [1, 1],
-          "as": ["alpha", "beta", "depth", "children"]
+          "type": "partition",
+          "field": "weight",
+          "sort": {"field": "id", "order": "ascending"},
+          "size": [
+            {"signal": "2 * PI"}, {"signal": "width / 2"}],
+          "as": ["a0", "r0", "a1", "r1", "depth", "children"]
         },
         {
           "type": "formula",
-          "expr": "(rotate + extent * datum.alpha + 270) % 360",
+          "expr": "(datum.a0 + datum.a1 )/ 2",
           "as":   "angle"
         },
         {
           "type": "formula",
-          "expr": "inrange(datum.angle, [90, 270])",
+          "expr": "inrange(datum.angle, [PI, 2 * PI])",
           "as":   "leftside"
         },
         {
           "type": "formula",
-          "expr": "originX + radius * datum.beta * cos(PI * datum.angle / 180)",
+          "expr": "originX + (radius-20)* cos(datum.angle - PI/2)",
           "as":   "x"
         },
         {
           "type": "formula",
-          "expr": "originY + radius * datum.beta * sin(PI * datum.angle / 180)",
+          "expr": "datum.id == -1 ? originX : datum.x",
+          "as": "x"
+        },
+        {
+          "type": "formula",
+          "expr": "originY + (radius-20)* sin(datum.angle - PI/2)",
           "as":   "y"
         },
         {
           "type": "formula",
-          "expr": "random() * 255",
-          "as":   "r"
-        },
-        {
-          "type": "formula",
-          "expr": "random() * 255",
-          "as":   "g"
-        },
-        {
-          "type": "formula",
-          "expr": "random() * 255",
-          "as":   "b"
-        }
-      ]
-    },
-    {
-      "name": "leaves",
-      "source": "tree",
-      "transform": [
-        {
-          "type": "filter",
-          "expr": "!datum.children"
+          "expr": "datum.id == -1 ? originY : datum.y",
+          "as": "y"
         }
       ]
     },
     {
       "name": "dependencies",
-      "url":"https://raw.githubusercontent.com/dmartin9/test/master/dependencies.json",
+      "url":"https://raw.githubusercontent.com/dmartin9/test/master/TestDependencies.json",
       "transform": [
-        {
-          "type": "filter",
-          "expr": "datum.source < 50"
-        },
-        {
-          "type": "filter",
-          "expr": "datum.target < 50"
-        },
         {
           "type": "formula",
           "expr": "treePath('tree', datum.source, datum.target)",
@@ -145,7 +120,17 @@
         },
         {
           "type": "filter",
-          "expr": "datum.similarity > 75"
+          "expr": "datum.similarity > 0"
+        }
+      ]
+    },
+    {
+      "name": "leaves",
+      "source": "tree",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "!datum.children"
         }
       ]
     },
@@ -160,7 +145,13 @@
       ]
     }
   ],
-
+  "scales": [
+    {
+      "name": "color",
+      "type": "ordinal",
+      "range": {"scheme": "category20"}
+    }
+  ],
   "marks": [
     {
       "type": "text",
@@ -171,11 +162,14 @@
           "baseline": {"value": "middle"}
         },
         "update": {
-          "x": {"field": "x"},
-          "y": {"field": "y"},
-          "dx": {"signal": "textOffset * (datum.leftside ? -1 : 1)"},
-          "angle": {"signal": "datum.leftside ? datum.angle - 180 : datum.angle"},
+          "x": {"signal": "originX"},
+          "y": {"signal": "originY"},
+          "dx": {"signal": "0"},
+          "theta": {"signal": "datum.angle"},
+          "radius":{"signal":"radius+20"},
+          "dx": {"signal": "textOffset * (datum.leftside ? 1 : -1)"},
           "align": {"signal": "datum.leftside ? 'right' : 'left'"},
+          "angle": {"signal": "datum.leftside ? (datum.angle * 180 / PI) + 90:(datum.angle * 180 / PI) - 90"},
           "fontSize": {"signal": "textSize"},
           "fontWeight": [
             {"test": "indata('selected', 'source', datum.id)", "value": "bold"},
@@ -195,32 +189,20 @@
       "from": {"data": "leaves"},
       "encode": {
         "enter": {
-          "fill": {"color": {
-                  "r": {"field": "r"},
-                  "g": {"field": "g"},
-                  "b": {"field": "b"}
-                }},
-              "stroke": {
-                "color": {
-                  "r": {"field": "r"},
-                  "g": {"field": "g"},
-                  "b": {"field": "b"}
-                }
-              }
+          "fill": {"scale": "color", "field": "id"},
+          "stroke": {"scale": "color", "field": "id"}
         },
         "update": {
           "x": {"signal": "originX"},
           "y": {"signal": "originY"},
-          "startAngle": {"signal": "(datum.angle-270) * PI / 180.0 -.05"},
-          "endAngle": {"signal": "(datum.angle-270) * PI / 180.0 +0.05"},
-          "padAngle": {"value":0},
-          "innerRadius": {"signal": "radius-10"},
+          "startAngle": {"signal": "datum.a0"},
+          "endAngle": {"signal": "datum.a1"},
+          "padAngle": {"value":0.01},
+          "innerRadius": {"signal": "radius-20"},
           "outerRadius": {"signal": "radius"},
           "strokeWidth": {"value": 0.1},
-          "opacity": {"value": 1}
-        },
-        "hover": {
-          "opacity": {"value": 0.5}
+          "opacity": [{"test": "active != null && !(indata('selected', 'source', datum.id)) && !(indata('selected', 'target', datum.id))", "value": 0},
+          {"value": 1}]
         }
       }
     },
@@ -241,19 +223,16 @@
           "encode": {
             "enter": {
               "interpolate": {"value": "bundle"},
-              "strokeWidth":  [{"test": "(parent.similarity  > 85)", "signal": "(parent.similarity - 85) * 0.9"},{"value":0.5}],
+              "strokeWidth":  [{"test": "(parent.similarity  > 15)", "signal": "(parent.similarity - 15) * 0.5"},{"value":0.5}],
               "stroke": {
-                "color": {
-                  "r": {"field": "r"},
-                  "g": {"field": "g"},
-                  "b": {"field": "b"}
-                }
+                "scale": "color", "field": "id"
               }
             },
             "update": {
               "strokeOpacity": [
+                {"test": "active != null && parent.source != active && parent.target != active", "value":0 },
                 {"test": "parent.source === active || parent.target === active", "value": 1},
-                {"test": "parent.similarity > 85", "value":0.5},
+                {"test": "parent.similarity > 15", "value":0.5},
                 {"value": 0.25}
               ],
               "tension": {"signal": "tension"},
