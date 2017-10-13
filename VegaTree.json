@@ -45,6 +45,7 @@
           "sort": {"field": "id", "order": "ascending"},
           "size": [
             {"signal": "2 * PI"}, {"signal": "width / 2"}],
+          "padding": 0.02,
           "as": ["a0", "r0", "a1", "r1", "depth", "children"]
         },
         {
@@ -176,7 +177,6 @@
           "y": {"signal": "originY"},
           "startAngle": {"signal": "datum.a0"},
           "endAngle": {"signal": "datum.a1"},
-          "padAngle": {"value":0.01},
           "innerRadius": {"signal": "radius-20"},
           "outerRadius": {"signal": "radius"},
           "strokeWidth": {"value": 0.1},
@@ -210,8 +210,7 @@
             "update": {
               "strokeOpacity": [
                 {"test": "active != null && parent.source != active && parent.target != active", "value":0 },
-                {"test": "parent.source === active || parent.target === active", "value": 1},
-                {"test": "parent.similarity > 15", "value":0.5},
+                {"test": "parent.similarity > 15", "value":0.75},
                 {"value": 0.25}
               ],
               "tension": {"signal": "tension"},
