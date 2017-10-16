@@ -1,0 +1,62 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+  "data": {"url": "https://raw.githubusercontent.com/dmartin9/test/master/Indices.csv"},
+  "layer": [{
+    "layer": [
+      {
+        "mark": "bar",
+        "encoding": {
+          "x": {
+            "field": "Index",
+            "type": "ordinal",
+            "axis": {"orient": "top"}
+            
+          },
+          "y": {
+            "field": "Long",
+            "type": "quantitative",
+            "axis": {"title": "position","grid":false}
+          },"color": {"value": "green"}
+        }
+      },
+      {
+        "mark": "bar",
+        "encoding": {
+          "x": {
+            "field": "Index",
+            "type": "ordinal"
+
+          },
+          "y": {
+            "field": "Short",
+            "type": "quantitative",
+            "axis": {"title": "position","grid":false}
+          },"color": {"value": "red"}
+        }
+      }
+    ],
+    "resolve": {
+        "scale": {"y": "shared","x": "shared"},
+        "axis": {"y": "shared","x": "shared"} 
+    }
+  },
+  {
+    "mark": "line",
+    "encoding": {
+      "x": {
+        "field": "Index",
+        "type": "ordinal"
+      },
+      "y": {
+        "field": "Return",
+        "type": "quantitative",
+        "axis": {"grid":false},
+        "scale": {"domain": [-5.0,5.0]}
+      },"color": {"value": "black"}
+    }
+  }
+  ],
+  "resolve": {
+   "scale": {"y": "independent"} 
+  }
+}
