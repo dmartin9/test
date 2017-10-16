@@ -1,5 +1,8 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+  "padding": 5,
+  "width": 1080,
+  "height": 900,
   "data": {"url": "https://raw.githubusercontent.com/dmartin9/test/master/Indices.csv"},
   "layer": [{
     "layer": [
