@@ -191,7 +191,7 @@
   "marks": [
     {
       "type": "text",
-      "from": {"data": "nodes"},
+      "from": {"data": "ents"},
       "encode": {
         "enter": {
           "text": {"field": "name"},
