@@ -7,12 +7,10 @@
 
   "signals": [
     {
-      "name": "tension", "value": 0.85,
-      "bind": {"input": "range", "min": 0, "max": 1, "step": 0.01}
+      "name": "tension", "value": 0.75
     },
     {
-      "name": "radius", "value": 280,
-      "bind": {"input": "range", "min": 20, "max": 400}
+      "name": "radius", "value": 280
     },
     {
       "name": "textSize", "value": 8,
@@ -34,7 +32,6 @@
       "name": "tree",
       "url": "https://raw.githubusercontent.com/dmartin9/test/master/treeNodes.json",
       "transform": [
-
         {
           "type": "stratify",
           "key": "id",
@@ -45,7 +42,7 @@
           "field": "weight",
           "sort": {"field": ["name"], "order": ["ascending"]},
           "size": [
-            {"signal": "2 * PI"}, {"signal": "width / 2"}],
+            {"signal": "2 * PI"}, {"signal": "(width / 2)+200"}],
           "padding": 0,
           "as": ["a0", "r0", "a1", "r1", "depth", "children"]
         },
@@ -64,6 +61,11 @@
           "expr": "originX + (datum.r0)* cos(datum.a0 - PI/2)",
           "as":   "x"
         },
+                {
+          "type": "formula",
+          "expr": "originX + (datum.r0)* cos(datum.a1 - PI/2)",
+          "as":   "x2"
+        },
         {
           "type": "formula",
           "expr": "datum.id == -1 ? originX : datum.x",
@@ -73,6 +75,11 @@
           "type": "formula",
           "expr": "originY + (datum.r0)* sin(datum.a0 - PI/2)",
           "as":   "y"
+        },
+        {
+          "type": "formula",
+          "expr": "originY + (datum.r0)* sin(datum.a1 - PI/2)",
+          "as":   "y2"
         },
         {
           "type": "formula",
@@ -206,7 +213,7 @@
           "align": {"signal": "datum.leftside ? 'right' : 'left'"},
           "angle": {"signal": "datum.leftside ? (datum.angle * 180 / PI) + 90:(datum.angle * 180 / PI) - 90"},
           "fontSize": {"signal": "textSize"},
-          "opacity": [{"test": "active != null && !(indata('selected', 'source', datum.id)) && !(indata('selected', 'target', datum.id))", "value": 0},
+          "opacity": [{"test": "active != null && !(indata('selected', 'name', datum.name)) && !(indata('selected', 'tp', datum.name))", "value": 0},
           {"value": 1}],
           "fill": [
             {"test": "datum.id === active", "value": "black"},
@@ -254,7 +261,7 @@
           "encode": {
             "enter": {
               "interpolate": {"value": "bundle"},
-              "strokeWidth":  [{"test": "(parent.weight  > 15)", "signal": "(parent.weight - 15) * 0.25"},{"value":0.5}],
+              "strokeWidth":  [{"test": "(parent.weight  > 0)", "signal": "(parent.weight) * 0.1"},{"value":0.5}],
               "stroke": {
                 "scale": "color", "field": "name"
               }
@@ -262,12 +269,14 @@
             "update": {
               "strokeOpacity": [
                 {"test": "active != null && !(active === parent.name) && !(active === parent.tp)", "value":0 },
-                {"test": "parent.weight > 15", "value":0.75},
+                {"test": "parent.weight > 14", "value":0.75},
                 {"value": 0.25}
               ],
               "tension": {"signal": "tension"},
               "x": {"signal": "datum.x"},
-              "y": {"signal": "datum.y"}
+              "y": {"signal": "datum.y"},
+              "x2": {"signal": "datum.x2"},
+              "y2": {"signal": "datum.y2"}
             }
           }
         }
