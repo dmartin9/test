@@ -116,7 +116,11 @@
       "transform": [
         {
           "type": "filter",
-          "expr": "datum.id != -1 && datum.a0 === datum.sAngle"
+          "expr": "datum.id != -1"
+        },
+        {
+          "type": "filter",
+          "expr": "datum.a0 === datum.sAngle && datum.a1 !== datum.sAngle "
         }
       ]
     },
