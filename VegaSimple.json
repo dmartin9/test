@@ -7,40 +7,21 @@
 
   "signals": [
     {
-      "name": "tension", "value": 0.85,
-      "bind": {"input": "range", "min": 0, "max": 1, "step": 0.01}
+      "name": "tension", "value": 0.75
     },
     {
-      "name": "radius", "value": 280,
-      "bind": {"input": "range", "min": 20, "max": 400}
-    },
-    {
-      "name": "extent", "value": 360,
-      "bind": {"input": "range", "min": 0, "max": 360, "step": 1}
-    },
-    {
-      "name": "rotate", "value": 0
+      "name": "radius", "value": 280
     },
     {
       "name": "textSize", "value": 8,
       "bind": {"input": "range", "min": 2, "max": 20, "step": 1}
     },
-    {
-      "name": "textOffset", "value": 2,
-      "bind": {"input": "range", "min": 0, "max": 10, "step": 1}
-    },
-    {
-      "name": "layout", "value": "cluster",
-      "bind": {"input": "radio", "options": ["tidy", "cluster"]}
-    },
-    { "name": "colorIn", "value": "firebrick" },
-    { "name": "colorOut", "value": "forestgreen" },
     { "name": "originX", "update": "width / 2" },
     { "name": "originY", "update": "height / 2" },
     {
       "name": "active", "value": null,
       "on": [
-        { "events": "arc:mouseover", "update": "datum.id" },
+        { "events": "arc:mouseover", "update": "datum.name" },
         { "events": "mouseover[!event.item]", "update": "null" }
       ]
     }
@@ -49,7 +30,7 @@
   "data": [
     {
       "name": "tree",
-      "url": "https://raw.githubusercontent.com/dmartin9/test/master/SimpleTree.json",
+      "url": "https://raw.githubusercontent.com/dmartin9/test/master/SimpleTreeDep.json",
       "transform": [
         {
           "type": "stratify",
@@ -59,9 +40,10 @@
         {
           "type": "partition",
           "field": "weight",
-          "sort": {"field": "id", "order": "ascending"},
+          "sort": {"field": ["name"], "order": ["ascending"]},
           "size": [
-            {"signal": "2 * PI"}, {"signal": "width / 2"}],
+            {"signal": "2 * PI"}, {"signal": "(width / 2)+200"}],
+          "padding": 0,
           "as": ["a0", "r0", "a1", "r1", "depth", "children"]
         },
         {
@@ -76,8 +58,13 @@
         },
         {
           "type": "formula",
-          "expr": "originX + (radius-20)* cos(datum.angle - PI/2)",
+          "expr": "originX + (datum.r0)* cos(datum.a0 - PI/2)",
           "as":   "x"
+        },
+                {
+          "type": "formula",
+          "expr": "originX + (datum.r0)* cos(datum.a1 - PI/2)",
+          "as":   "x2"
         },
         {
           "type": "formula",
@@ -86,41 +73,30 @@
         },
         {
           "type": "formula",
-          "expr": "originY + (radius-20)* sin(datum.angle - PI/2)",
+          "expr": "originY + (datum.r0)* sin(datum.a0 - PI/2)",
           "as":   "y"
+        },
+        {
+          "type": "formula",
+          "expr": "originY + (datum.r0)* sin(datum.a1 - PI/2)",
+          "as":   "y2"
         },
         {
           "type": "formula",
           "expr": "datum.id == -1 ? originY : datum.y",
           "as": "y"
-        }
-      ]
-    },
-    {
-      "name": "dependencies",
-      "url":"https://raw.githubusercontent.com/dmartin9/test/master/SimpleDep.json",
-      "transform": [
+        },
+        {
+          "type": "joinaggregate",
+          "groupby": ["name"],
+          "fields": ["weight","a0","a1"],
+          "ops": ["sum","min","max"],
+          "as": ["sWeight","sAngle", "eAngle"]
+        },
         {
           "type": "formula",
-          "expr": "treePath('tree', datum.source, datum.target)",
-          "as":   "treepath",
-          "initonly": true
-        },
-        {
-          "type": "lookup",
-          "from": "tree",
-          "key": "id",
-          "values": ["weight"],
-          "fields": ["source","target"],
-          "as": ["sWeight","tWeight"]
-        },
-        {
-          "type": "filter",
-          "expr": "datum.sWeight > datum.tWeight"
-        },
-        {
-          "type": "filter",
-          "expr": "datum.similarity > 0"
+          "expr": "(datum.sAngle + datum.eAngle) / 2",
+          "as": "midAngle"
         }
       ]
     },
@@ -135,12 +111,83 @@
       ]
     },
     {
+      "name": "ents",
+      "source": "tree",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.id != -1"
+        },
+        {
+          "type": "filter",
+          "expr": "datum.a0 === datum.sAngle && datum.a1 !== datum.sAngle "
+        }
+      ]
+    },
+    {
+      "name": "dependencies",
+      "source":"leaves",
+      "transform": [
+        {
+          "type": "formula",
+          "expr": "treePath('tree', datum.source, datum.target)",
+          "as":   "treepath",
+          "initonly": true
+        },
+        {
+          "type": "lookup",
+          "from": "tree",
+          "key": "id",
+          "values": ["name"],
+          "fields": ["target"],
+          "as": ["tp"]
+        },
+        {
+          "type": "lookup",
+          "from": "tree",
+          "key": "id",
+          "values": ["sWeight"],
+          "fields": ["target"],
+          "as": ["tWeight"]
+        },
+        {
+          "type": "filter",
+          "expr": "datum.sWeight > datum.tWeight"
+        },
+        {
+          "type": "filter",
+          "expr": "datum.weight > 0"
+        }
+      ]
+    },
+    {
+      "name": "nodes",
+      "source": "tree",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.id != -1"
+        }
+      ]
+    },
+    {
+      "name": "counts",
+      "source": "dependencies",
+      "transform": [
+        {
+          "type": "aggregate",
+          "groupby": ["source"],
+          "as": ["c"]
+        }
+      ]
+    },
+    {
       "name": "selected",
       "source": "dependencies",
       "transform": [
         {
           "type": "filter",
-          "expr": "datum.source === active || datum.target === active"
+          "expr": "datum.name === active || datum.tp === active"
         }
       ]
     }
@@ -155,7 +202,7 @@
   "marks": [
     {
       "type": "text",
-      "from": {"data": "leaves"},
+      "from": {"data": "ents"},
       "encode": {
         "enter": {
           "text": {"field": "name"},
@@ -164,18 +211,14 @@
         "update": {
           "x": {"signal": "originX"},
           "y": {"signal": "originY"},
-          "dx": {"signal": "0"},
-          "theta": {"signal": "datum.angle"},
-          "radius":{"signal":"radius+20"},
-          "dx": {"signal": "textOffset * (datum.leftside ? 1 : -1)"},
+          "theta": {"signal": "datum.midAngle"},
+          "radius":{"signal":"datum.r0+30"},
+          "dx": {"signal": "2 * (datum.leftside ? 1 : -1)"},
           "align": {"signal": "datum.leftside ? 'right' : 'left'"},
           "angle": {"signal": "datum.leftside ? (datum.angle * 180 / PI) + 90:(datum.angle * 180 / PI) - 90"},
           "fontSize": {"signal": "textSize"},
-          "fontWeight": [
-            {"test": "indata('selected', 'source', datum.id)", "value": "bold"},
-            {"test": "indata('selected', 'target', datum.id)", "value": "bold"},
-            {"value": null}
-          ],
+          "opacity": [{"test": "active != null && !(indata('selected', 'name', datum.name)) && !(indata('selected', 'tp', datum.name))", "value": 0},
+          {"value": 1}],
           "fill": [
             {"test": "datum.id === active", "value": "black"},
 
@@ -186,22 +229,21 @@
     },
     {
       "type": "arc",
-      "from": {"data": "leaves"},
+      "from": {"data": "nodes"},
       "encode": {
         "enter": {
-          "fill": {"scale": "color", "field": "id"},
-          "stroke": {"scale": "color", "field": "id"}
+          "fill": {"scale": "color", "field": "name"},
+          "stroke": {"scale": "color", "field": "name"}
         },
         "update": {
           "x": {"signal": "originX"},
           "y": {"signal": "originY"},
           "startAngle": {"signal": "datum.a0"},
           "endAngle": {"signal": "datum.a1"},
-          "padAngle": {"value":0.01},
-          "innerRadius": {"signal": "radius-20"},
-          "outerRadius": {"signal": "radius"},
+          "innerRadius": {"signal": "datum.r0"},
+          "outerRadius": {"signal": "datum.r0 + 20"},
           "strokeWidth": {"value": 0.1},
-          "opacity": [{"test": "active != null && !(indata('selected', 'source', datum.id)) && !(indata('selected', 'target', datum.id))", "value": 0},
+          "opacity": [{"test": "active != null && !(indata('selected', 'name', datum.name)) && !(indata('selected', 'tp', datum.name))", "value": 0},
           {"value": 1}]
         }
       }
@@ -223,21 +265,22 @@
           "encode": {
             "enter": {
               "interpolate": {"value": "bundle"},
-              "strokeWidth":  [{"test": "(parent.similarity  > 15)", "signal": "(parent.similarity - 15) * 0.5"},{"value":0.5}],
+              "strokeWidth":  [{"test": "(parent.weight  > 0)", "signal": "(parent.weight) * 0.1"},{"value":0.5}],
               "stroke": {
-                "scale": "color", "field": "id"
+                "scale": "color", "field": "name"
               }
             },
             "update": {
               "strokeOpacity": [
-                {"test": "active != null && parent.source != active && parent.target != active", "value":0 },
-                {"test": "parent.source === active || parent.target === active", "value": 1},
-                {"test": "parent.similarity > 15", "value":0.5},
+                {"test": "active != null && !(active === parent.name) && !(active === parent.tp)", "value":0 },
+                {"test": "parent.weight > 14", "value":0.75},
                 {"value": 0.25}
               ],
               "tension": {"signal": "tension"},
-              "x": {"field": "x"},
-              "y": {"field": "y"}
+              "x": {"signal": "datum.x"},
+              "y": {"signal": "datum.y"},
+              "x2": {"signal": "datum.x2"},
+              "y2": {"signal": "datum.y2"}
             }
           }
         }
